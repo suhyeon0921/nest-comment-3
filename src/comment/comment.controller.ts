@@ -1,14 +1,17 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { ParentIdDto } from './dto/parent-id.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('comments')
 export class CommentController {
@@ -32,5 +35,11 @@ export class CommentController {
       parentIdDto.parentId,
       createCommentDto,
     );
+  }
+
+  /** 댓글 조회 */
+  @Get()
+  async getAllComments(@Query() paginationDto: PaginationDto) {
+    return this.commentService.getAllComments(paginationDto);
   }
 }
