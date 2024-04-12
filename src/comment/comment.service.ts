@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -66,5 +66,28 @@ export class CommentService {
       page,
       totalPage: Math.ceil(total / limit),
     };
+  }
+
+  /**
+   * 댓글 삭제:
+   * hard delete
+   */
+  async deleteComment(commentId: number) {
+    const comment = await this.commentRepository.findOne({
+      where: { id: commentId },
+      relations: ['children'],
+    });
+
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
+
+    if (comment.children.length > 0) {
+      await Promise.all(
+        comment.children.map((child) => this.deleteComment(child.id)),
+      );
+    }
+
+    await this.commentRepository.remove(comment);
   }
 }

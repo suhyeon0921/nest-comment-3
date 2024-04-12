@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -10,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { ParentIdDto } from './dto/parent-id.dto';
+import { CommentIdDto } from './dto/comment-id.dto';
 import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('comments')
@@ -20,7 +21,7 @@ export class CommentController {
   /** 댓글 생성 */
   @Post()
   @HttpCode(HttpStatus.OK)
-  async createStory(@Body() createCommentDto: CreateCommentDto) {
+  async createComment(@Body() createCommentDto: CreateCommentDto) {
     return await this.commentService.createComment(createCommentDto);
   }
 
@@ -28,18 +29,25 @@ export class CommentController {
   @Post(':parentId')
   @HttpCode(HttpStatus.OK)
   async createReply(
-    @Param() parentIdDto: ParentIdDto,
+    @Param() parentIdDto: CommentIdDto,
     @Body() createCommentDto: CreateCommentDto,
   ) {
     return await this.commentService.createReply(
-      parentIdDto.parentId,
+      parentIdDto.commentId,
       createCommentDto,
     );
   }
 
-  /** 댓글 조회 */
+  /** 댓글/대댓글 조회 */
   @Get()
   async getAllComments(@Query() paginationDto: PaginationDto) {
     return this.commentService.getAllComments(paginationDto);
+  }
+
+  /** 댓글/대댓글 삭제 */
+  @Delete(':commentId')
+  @HttpCode(HttpStatus.OK)
+  async deleteComment(@Param() commentIdDto: CommentIdDto) {
+    return this.commentService.deleteComment(commentIdDto.commentId);
   }
 }
